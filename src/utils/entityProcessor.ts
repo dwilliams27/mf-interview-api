@@ -37,7 +37,7 @@ export async function handleEntities(payment: XPayment, maps: PaymentMetadataMap
       individual: {
         first_name: payment.Employee?.FirstName ?? '',
         last_name: payment.Employee?.LastName ?? '',
-        phone: payment.Employee?.PhoneNumber ?? '',
+        phone: '15121231111',
         dob: formatDOB(payment.Employee?.DOB)
       }
     });

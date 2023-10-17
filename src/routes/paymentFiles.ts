@@ -12,10 +12,10 @@ paymentFilesRouter.post('/', async (req, res) => {
   // Add new file to DB
   const uuid = await dbService.addPaymentFile(req.body.fileName);
 
-  // Process payments
+  // Process payments asynchronously
   processPayments(req.body.payments, uuid, req.headers.authorization);
 
-  return res.send(200).send(uuid);
+  return res.sendStatus(200);
 });
 
 export default paymentFilesRouter;

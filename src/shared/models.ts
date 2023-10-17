@@ -33,7 +33,7 @@ export interface MethodAccountsPayload {
 }
 
 export interface MethodPaymentsPayload {
-  amount: string;
+  amount: number;
   source: string;
   destination: string;
   description: string;

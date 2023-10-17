@@ -1,3 +1,4 @@
+import { PAYMENT_DESCRIPTION } from "../shared/constants";
 import { Individual, Payment, PaymentMetadataMaps } from "../shared/models"
 import { XEmployee, XPayee, XPayment, XPayor } from "../shared/xml-models"
 
@@ -23,7 +24,7 @@ export function getUniqueIndividualId(individual: Individual | XEmployee) {
 export function getUniquePaymentId(payment: Payment | XPayment, maps: PaymentMetadataMaps) {
   if('Employee' in payment) {
     payment = payment as XPayment;
-    return (maps.accountIds[generateUniquePayorId(payment.Payor, maps)] + maps.accountIds[generateUniquePayeeId(payment.Payee, maps)] + payment.Amount + ('Loan Payment'));
+    return (maps.accountIds[generateUniquePayorId(payment.Payor, maps)] + maps.accountIds[generateUniquePayeeId(payment.Payee, maps)] + stripNonDigits(payment.Amount) + (PAYMENT_DESCRIPTION));
   } else {
     payment = payment as Payment;
     return (payment.source + payment.destination + payment.amount + payment.description);
@@ -38,4 +39,8 @@ export function formatDOB(dob: string | undefined) {
   if(split.length != 3) return dob;
 
   return `${split[2]}-${split[0]}-${split[1]}`;
+}
+
+export function stripNonDigits(str: string) {
+  return str.replace(/\D/g,'');
 }

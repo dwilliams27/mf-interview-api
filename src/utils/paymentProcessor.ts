@@ -1,7 +1,7 @@
-import { getEntities, getPayments, postEntities, postPayments } from "../services/method.service";
-import { PROCESSING_STATUS, RATE_LIMIT_EXCEEDED_ERROR } from "../shared/constants";
+import { getPayments, postPayments } from "../services/method.service";
+import { PAYMENT_DESCRIPTION, PROCESSING_STATUS, RATE_LIMIT_EXCEEDED_ERROR } from "../shared/constants";
 import { Payment, PaymentMetadataMaps } from "../shared/models";
-import { XEmployee, XPayment } from "../shared/xml-models";
+import { XPayment } from "../shared/xml-models";
 import { generateUniquePayeeId, generateUniquePayorId, getUniquePaymentId } from "./id.generators";
 
 // Assuming (source + destination + amount + description) is unique per payment
@@ -21,29 +21,31 @@ export async function getExistingPayments(maps: PaymentMetadataMaps, auth: strin
       }
     }
   }
+
+  console.log(maps.paymentIds)
 }
 
 export async function handlePayments(payment: XPayment, maps: PaymentMetadataMaps, auth: string): Promise<PROCESSING_STATUS> {
   // If new payment
-  if(!(getUniquePaymentId(payment, maps) in maps.entityIds)) {
+  if(!(getUniquePaymentId(payment, maps) in maps.paymentIds)) {
     // Create new payment
     console.log('Creating new payment');
-    const entityResponse = await postPayments(auth, {
+    const paymentResponse = await postPayments(auth, {
       source: maps.accountIds[generateUniquePayorId(payment.Payor, maps)],
       destination: maps.accountIds[generateUniquePayeeId(payment.Payee, maps)],
-      amount: payment.Amount,
-      description: 'Loan Payment'
+      amount: Math.floor(parseFloat(payment.Amount.substring(1)) * 100),
+      description: PAYMENT_DESCRIPTION
     });
 
     // If payment successfully created, add to map
-    if(entityResponse.ok) {
-      maps.entityIds[getUniquePaymentId(payment, maps)] = (await entityResponse.json()).id;
-      console.log('Success!')
-    } else if(entityResponse.status == 429) {
+    if(paymentResponse.ok) {
+      maps.paymentIds[getUniquePaymentId(payment, maps)] = (await paymentResponse.json()).id;
+      console.log('Payment successfully created.')
+    } else if(paymentResponse.status == 429) {
       console.log(RATE_LIMIT_EXCEEDED_ERROR);
       return PROCESSING_STATUS.RETRY;
     } else {
-      const error = await entityResponse.json();
+      const error = await paymentResponse.json();
       console.log('Error creating payment');
       console.log(error);
       return PROCESSING_STATUS.UNRECOVERABLE;

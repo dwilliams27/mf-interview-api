@@ -31,6 +31,10 @@ export function getUniquePaymentId(payment: Payment | XPayment, maps: PaymentMet
   }
 }
 
+export function generateUniqueFailedPaymentId(payment: XPayment) {
+  return (payment.Payor.EIN + payment.Payee.PlaidId + payment.Amount + PAYMENT_DESCRIPTION);
+}
+
 // MM-DD-YYYY -> YYYY-MM-DD
 export function formatDOB(dob: string | undefined) {
   if(!dob) return '';

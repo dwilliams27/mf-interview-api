@@ -1,10 +1,7 @@
 import 'dotenv/config';
 import cors from 'cors';
 import express from 'express';
-import entitiesRouter from './routes/entities';
 import paymentFilesRouter from './routes/paymentFiles';
-import accountsRouter from './routes/accounts';
-import paymentsRouter from './routes/payments';
 
 // Setup
 const PORT = 3001;
@@ -19,9 +16,6 @@ app.use((req, res, next) => {
 });
 
 // Routes
-app.use('/entities', entitiesRouter);
-app.use('/accounts', accountsRouter);
-app.use('/payments', paymentsRouter);
 app.use('/paymentFiles', paymentFilesRouter);
 
 // Startup

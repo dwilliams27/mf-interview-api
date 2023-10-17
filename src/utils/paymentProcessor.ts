@@ -21,8 +21,6 @@ export async function getExistingPayments(maps: PaymentMetadataMaps, auth: strin
       }
     }
   }
-
-  console.log(maps.paymentIds)
 }
 
 export async function handlePayments(payment: XPayment, maps: PaymentMetadataMaps, auth: string): Promise<PROCESSING_STATUS> {

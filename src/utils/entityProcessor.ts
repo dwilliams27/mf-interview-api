@@ -52,7 +52,7 @@ export async function handleEntities(payment: XPayment, maps: PaymentMetadataMap
     } else {
       const error = await entityResponse.json();
       console.log('Error creating individual entity');
-      console.log(error);
+      return PROCESSING_STATUS.UNRECOVERABLE;
     }
   }
 
@@ -88,7 +88,6 @@ export async function handleEntities(payment: XPayment, maps: PaymentMetadataMap
     } else {
       const error = await entityResponse.json();
       console.log('Error creating corporate entity');
-      console.log(error);
       return PROCESSING_STATUS.UNRECOVERABLE;
     }
   }

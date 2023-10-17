@@ -24,8 +24,6 @@ export async function getExistingAccounts(maps: PaymentMetadataMaps, auth: strin
         maps.accountIds[uid] = account.id;
       }
     }
-  } else {
-    return null;
   }
 }
 

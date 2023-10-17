@@ -18,4 +18,12 @@ paymentFilesRouter.post('/', async (req, res) => {
   return res.sendStatus(200);
 });
 
+paymentFilesRouter.get('/', async (req, res) => {
+  if(!req.headers.authorization) return res.status(401).send(AUTH_HEADER_ERROR);
+
+  const files = await dbService.getPaymentFiles();
+
+  return res.send(files);
+});
+
 export default paymentFilesRouter;

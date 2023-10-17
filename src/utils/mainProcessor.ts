@@ -1,3 +1,4 @@
+import dbService from "../services/db.service";
 import { PROCESSING_STATUS } from "../shared/constants";
 import { PaymentMetadataMaps } from "../shared/models";
 import { XPayment } from "../shared/xml-models";
@@ -39,6 +40,9 @@ export async function processPayments(payments: XPayment[], fileUuid: string, au
   console.log('Payments processed');
   console.log('Failed payments:');
   console.log(failedPayments);
+
+  await dbService.updatePaymentFileState(fileUuid, failedPayments.size, 'Processed');
+  console.log('Payment file status updated in DB')
 }
 
 async function processStep(

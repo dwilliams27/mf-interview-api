@@ -85,7 +85,10 @@ async function backoff() {
   await new Promise(resolve => {
     setTimeout(resolve, backoffTime);
   });
-  backoffTime *= 2;
+  // Max backoff of 32 seconds
+  if(backoffTime * 2 < 32001) {
+    backoffTime *= 2;
+  }
 }
 
 

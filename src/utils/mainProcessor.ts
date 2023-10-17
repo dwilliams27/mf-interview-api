@@ -31,9 +31,9 @@ export async function processPayments(payments: XPayment[], fileUuid: string, au
   // Process payments
   for(const payment of payments) {
     // If any processing step results in a retry or failure, move on to next payment
-    if(!(await processStep(payment, payments, failedPayments, maps, auth, handleEntities))) continue;
-    if(!(await processStep(payment, payments, failedPayments, maps, auth, handleAccounts))) continue;
-    if(!(await processStep(payment, payments, failedPayments, maps, auth, handlePayments))) continue;
+    if(!(await processStep(payment, payments, failedPayments, maps, auth, fileUuid, handleEntities))) continue;
+    if(!(await processStep(payment, payments, failedPayments, maps, auth, fileUuid, handleAccounts))) continue;
+    if(!(await processStep(payment, payments, failedPayments, maps, auth, fileUuid, handlePayments))) continue;
   }
 
   console.log('Payments processed');
@@ -47,9 +47,10 @@ async function processStep(
   failedPayments: Set<string>,
   maps: PaymentMetadataMaps, 
   auth: string, 
-  handleFunc: (payment: XPayment, maps: PaymentMetadataMaps, auth: string) => {}
+  uuid: string,
+  handleFunc: (payment: XPayment, maps: PaymentMetadataMaps, auth: string, uuid: string) => {}
 ) {
-  const paymentsStatus = await handleFunc(payment, maps, auth);
+  const paymentsStatus = await handleFunc(payment, maps, auth, uuid);
   // Got rate limited, reprocess
   if(paymentsStatus == PROCESSING_STATUS.RETRY) {
     payments.push(payment);

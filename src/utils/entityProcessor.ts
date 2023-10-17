@@ -27,7 +27,7 @@ export async function getExistingEntities(maps: PaymentMetadataMaps, auth: strin
   }
 }
 
-export async function handleEntities(payment: XPayment, maps: PaymentMetadataMaps, auth: string): Promise<PROCESSING_STATUS> {
+export async function handleEntities(payment: XPayment, maps: PaymentMetadataMaps, auth: string, uuid: string): Promise<PROCESSING_STATUS> {
   // If new Employee
   if(!(getUniqueIndividualId(payment.Employee) in maps.entityIds)) {
     // Create new entity
@@ -44,7 +44,7 @@ export async function handleEntities(payment: XPayment, maps: PaymentMetadataMap
 
     // If entity successfully created, add to map
     if(entityResponse.ok) {
-      maps.entityIds[getUniqueIndividualId(payment.Employee)] = (await entityResponse.json()).id;
+      maps.entityIds[getUniqueIndividualId(payment.Employee)] = (await entityResponse.json()).data.id;
       console.log('Individual entity created.')
     } else if(entityResponse.status == 429) {
       console.log(RATE_LIMIT_EXCEEDED_ERROR);
@@ -80,8 +80,8 @@ export async function handleEntities(payment: XPayment, maps: PaymentMetadataMap
 
     // If entity successfully created, add to map
     if(entityResponse.ok) {
-      maps.entityIds[payment.Payor.EIN] = (await entityResponse.json()).id;
-      console.log('Success!')
+      maps.entityIds[payment.Payor.EIN] = (await entityResponse.json()).data.id;
+      console.log('Created corporate entity');
     } else if(entityResponse.status == 429) {
       console.log(RATE_LIMIT_EXCEEDED_ERROR);
       return PROCESSING_STATUS.RETRY;

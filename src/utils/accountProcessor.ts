@@ -27,7 +27,7 @@ export async function getExistingAccounts(maps: PaymentMetadataMaps, auth: strin
   }
 }
 
-export async function handleAccounts(payment: XPayment, maps: PaymentMetadataMaps, auth: string): Promise<PROCESSING_STATUS> {
+export async function handleAccounts(payment: XPayment, maps: PaymentMetadataMaps, auth: string, uuid: string): Promise<PROCESSING_STATUS> {
   // Check for merchant id, retrive if not in cache
   if(!(payment.Payee.PlaidId in maps.merchantIds)) {
     const merchantResponse = await getMerchant(auth, payment.Payee.PlaidId);
@@ -52,7 +52,6 @@ export async function handleAccounts(payment: XPayment, maps: PaymentMetadataMap
   if(!(generateUniquePayeeId(payment.Payee, maps) in maps.accountIds)) {
     console.log('Creating new payee account');
     // Create new account
-    console.log(maps.merchantIds[payment.Payee.PlaidId])
     const accountResponse = await postAccounts(auth, {
       holder_id: maps.entityIds[getUniqueIndividualId(payment.Employee)],
       liability: {
@@ -63,8 +62,8 @@ export async function handleAccounts(payment: XPayment, maps: PaymentMetadataMap
 
     // If account successfully created, add to cache
     if(accountResponse.ok) {
-      maps.accountIds[generateUniquePayeeId(payment.Payee, maps)] = (await accountResponse.json()).id;
-      console.log('Success!')
+      maps.accountIds[generateUniquePayeeId(payment.Payee, maps)] = (await accountResponse.json()).data.id;
+      console.log('Payee account created')
     } else if(accountResponse.status == 429) {
       console.log(RATE_LIMIT_EXCEEDED_ERROR);
       return PROCESSING_STATUS.RETRY;
@@ -92,8 +91,8 @@ export async function handleAccounts(payment: XPayment, maps: PaymentMetadataMap
 
     // If account successfully created, add to cache
     if(accountResponse.ok) {
-      maps.accountIds[generateUniquePayorId(payment.Payor, maps)] = (await accountResponse.json()).id;
-      console.log('Success!')
+      maps.accountIds[generateUniquePayorId(payment.Payor, maps)] = (await accountResponse.json()).data.id;
+      console.log('Created corporate account');
     } else if(accountResponse.status == 429) {
       console.log(RATE_LIMIT_EXCEEDED_ERROR);
       return PROCESSING_STATUS.RETRY;

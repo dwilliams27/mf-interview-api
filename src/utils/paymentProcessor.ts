@@ -23,7 +23,7 @@ export async function getExistingPayments(maps: PaymentMetadataMaps, auth: strin
   }
 }
 
-export async function handlePayments(payment: XPayment, maps: PaymentMetadataMaps, auth: string): Promise<PROCESSING_STATUS> {
+export async function handlePayments(payment: XPayment, maps: PaymentMetadataMaps, auth: string, fileUuid: string): Promise<PROCESSING_STATUS> {
   // If new payment
   if(!(getUniquePaymentId(payment, maps) in maps.paymentIds)) {
     // Create new payment
@@ -32,12 +32,15 @@ export async function handlePayments(payment: XPayment, maps: PaymentMetadataMap
       source: maps.accountIds[generateUniquePayorId(payment.Payor, maps)],
       destination: maps.accountIds[generateUniquePayeeId(payment.Payee, maps)],
       amount: Math.floor(parseFloat(payment.Amount.substring(1)) * 100),
-      description: PAYMENT_DESCRIPTION
+      description: PAYMENT_DESCRIPTION,
+      metadata: {
+        file_uuid: fileUuid
+      }
     });
 
     // If payment successfully created, add to map
     if(paymentResponse.ok) {
-      maps.paymentIds[getUniquePaymentId(payment, maps)] = (await paymentResponse.json()).id;
+      maps.paymentIds[getUniquePaymentId(payment, maps)] = (await paymentResponse.json()).data.id;
       console.log('Payment successfully created.')
     } else if(paymentResponse.status == 429) {
       console.log(RATE_LIMIT_EXCEEDED_ERROR);

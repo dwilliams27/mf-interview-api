@@ -37,6 +37,7 @@ export interface MethodPaymentsPayload {
   source: string;
   destination: string;
   description: string;
+  metadata?: { [key: string]: string };
 }
 
 export interface MethodGetPaymentsResponse {

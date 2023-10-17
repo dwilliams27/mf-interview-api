@@ -41,7 +41,7 @@ export async function handlePayments(payment: XPayment, maps: PaymentMetadataMap
     // If payment successfully created, add to map
     if(paymentResponse.ok) {
       maps.paymentIds[getUniquePaymentId(payment, maps)] = (await paymentResponse.json()).data.id;
-      console.log('Payment successfully created.')
+      console.log('Payment successfully created')
     } else if(paymentResponse.status == 429) {
       console.log(RATE_LIMIT_EXCEEDED_ERROR);
       return PROCESSING_STATUS.RETRY;
@@ -51,6 +51,19 @@ export async function handlePayments(payment: XPayment, maps: PaymentMetadataMap
       console.log(error);
       return PROCESSING_STATUS.UNRECOVERABLE;
     }
+  }
+
+  // Add source and branch reporting metadata
+  if(!(generateUniquePayorId(payment.Payor, maps) in maps.sourceAmounts)) {
+    maps.sourceAmounts[generateUniquePayorId(payment.Payor, maps)] = 0;
+  }
+  maps.sourceAmounts[generateUniquePayorId(payment.Payor, maps)] += parseFloat(payment.Amount.substring(1));
+
+  if(payment.Employee.DunkinBranch) {
+    if(!(payment.Employee.DunkinBranch in maps.branchAmounts)) {
+      maps.branchAmounts[payment.Employee.DunkinBranch] = 0;
+    }
+    maps.branchAmounts[payment.Employee.DunkinBranch] += parseFloat(payment.Amount.substring(1));
   }
 
   return PROCESSING_STATUS.OK;

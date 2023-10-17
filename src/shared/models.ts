@@ -113,6 +113,8 @@ export interface PaymentMetadataMaps {
   accountIds: { [key: string]: string };
   paymentIds: { [key: string]: string };
   merchantIds: { [key: string]: string };
+  branchAmounts: { [key: string]: number };
+  sourceAmounts: { [key: string]: number };
 }
 
 export interface Account {

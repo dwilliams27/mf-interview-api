@@ -7,6 +7,7 @@ import { getExistingEntities, handleEntities } from "./entityProcessor";
 import { generateUniqueFailedPaymentId } from "./id.generators";
 import { getExistingPayments, handlePayments } from "./paymentProcessor";
 
+// in ms
 let backoffTime = 1000;
 
 export async function processPayments(payments: XPayment[], fileUuid: string, auth: string) {
@@ -16,7 +17,9 @@ export async function processPayments(payments: XPayment[], fileUuid: string, au
     entityIds: {},
     accountIds: {},
     paymentIds: {},
-    merchantIds: {}
+    merchantIds: {},
+    sourceAmounts: {},
+    branchAmounts: {}
   };
 
   const failedPayments = new Set<string>();
@@ -37,10 +40,20 @@ export async function processPayments(payments: XPayment[], fileUuid: string, au
     if(!(await processStep(payment, payments, failedPayments, maps, auth, fileUuid, handlePayments))) continue;
   }
 
+  // Report failed payments
   console.log('Payments processed');
   console.log('Failed payments:');
   console.log(failedPayments);
 
+  // Add branch and source reporting metadata to DB
+  for(const [key, value] of Object.entries(maps.sourceAmounts)) {
+    await dbService.addPaymentFileSourceAmt(fileUuid, key, value);
+  }
+  for(const [key, value] of Object.entries(maps.branchAmounts)) {
+    await dbService.addPaymentFileBranchAmt(fileUuid, key, value);
+  }
+
+  // Update payment file status in DB
   await dbService.updatePaymentFileState(fileUuid, failedPayments.size, 'Processed');
   console.log('Payment file status updated in DB')
 }

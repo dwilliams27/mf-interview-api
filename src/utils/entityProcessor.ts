@@ -45,7 +45,7 @@ export async function handleEntities(payment: XPayment, maps: PaymentMetadataMap
     // If entity successfully created, add to map
     if(entityResponse.ok) {
       maps.entityIds[getUniqueIndividualId(payment.Employee)] = (await entityResponse.json()).data.id;
-      console.log('Individual entity created.')
+      console.log('Individual entity created')
     } else if(entityResponse.status == 429) {
       console.log(RATE_LIMIT_EXCEEDED_ERROR);
       return PROCESSING_STATUS.RETRY;
@@ -59,7 +59,7 @@ export async function handleEntities(payment: XPayment, maps: PaymentMetadataMap
   // If new corp id
   if(!(payment.Payor.EIN in maps.entityIds)) {
     // Create new entity
-    console.log('Corporate entity created.');
+    console.log('Corporate entity created');
     const entityResponse = await postEntities(auth, {
       type: "llc",
       corporation: {
